@@ -78,6 +78,11 @@
           <button id="yesBtn" class="choice">Yes</button>
           <button id="noBtn" class="choice">No</button>
         </section>
+
+        <p id="cheekyText" style="color: #2e1065; font-weight: bold; margin-top: 20px; opacity: 0; transition: opacity 1s ease;">
+          Is "No" even an option? 😈
+        </p>
+        
       </div>
     </div>
 
@@ -120,6 +125,12 @@
           heading.innerText = "Will you be my Valentine?";
           heading.style.opacity = 1;
           stretchContent.classList.add('open');
+
+          // WAIT 4 SECONDS THEN SHOW PHRASE
+          setTimeout(() => {
+            cheekyText.style.opacity = "1";
+          }, 3000);
+          
         }, 500);
       }, 1500);
     }
@@ -158,3 +169,4 @@
   </script>
 </body>
 </html>
+
