@@ -46,16 +46,14 @@
       border-radius: 22px;
       text-align: center;
       box-shadow: 0 18px 60px rgba(0,0,0,.15);
-      /* Smoothly animate the height changes */
       transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
       overflow: hidden;
     }
 
-    /* Content wrapper to handle height animation */
     .collapsible-content {
       display: grid;
       grid-template-rows: 0fr;
-      transition: grid-template-rows 0.6s ease;
+      transition: grid-template-rows 0.6s ease, opacity 0.6s ease;
       opacity: 0;
     }
 
@@ -65,9 +63,7 @@
       margin-top: 10px;
     }
 
-    .inner {
-      overflow: hidden;
-    }
+    .inner { overflow: hidden; }
 
     .art {
       width: min(260px, 80vw);
@@ -84,8 +80,8 @@
 
     .button-zone {
       position: relative;
-      width: min(520px, 92%);
-      height: 150px;
+      width: 100%;
+      height: 160px;
       margin: 0 auto;
       touch-action: none;
     }
@@ -100,13 +96,26 @@
       border-radius: 999px;
       border: none;
       cursor: pointer;
-      box-shadow: 0 10px 24px rgba(0,0,0,.14);
       user-select: none;
+      -webkit-tap-highlight-color: transparent;
       transition: transform .12s ease, background .12s ease;
     }
 
-    #yesBtn { left: 18%; background: var(--yes); color: #fff; z-index: 10; }
-    #noBtn { left: 62%; background: #e5e7eb; color: #111827; z-index: 5; }
+    #yesBtn {
+      left: 18%;
+      background: var(--yes);
+      color: #fff;
+      z-index: 10;
+      box-shadow: 0 4px 12px rgba(255, 59, 122, 0.25);
+    }
+
+    #noBtn {
+      left: 62%;
+      background: #e5e7eb;
+      color: #111827;
+      z-index: 100; 
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
 
     .hint {
       margin-top: 10px;
@@ -165,39 +174,27 @@
     const hint = document.getElementById("hint");
     const heading = document.getElementById("heading");
     const stretchContent = document.getElementById("stretchContent");
-    const mainCard = document.getElementById("mainCard");
 
-    /* ---------- SEQUENCE LOGIC ---------- */
     window.onload = () => {
       heading.innerText = "Hi Sonya,";
-      
       setTimeout(() => {
         heading.style.opacity = 0;
-        
         setTimeout(() => {
           heading.innerText = "Will you be my Valentine?";
           heading.style.opacity = 1;
-          
-          // Trigger the smooth stretch
           stretchContent.classList.add('open');
-          
-          setTimeout(() => {
-            hint.style.opacity = 0.7;
-          }, 3000);
+          setTimeout(() => { hint.style.opacity = 0.7; }, 3000);
         }, 500);
       }, 1500);
     };
 
-    /* ---------- PHYSICS LOGIC ---------- */
     let yesScale = 1;
     function growYes() {
-      yesScale = Math.min(2.2, yesScale + 0.1);
+      yesScale = Math.min(2.5, yesScale + 0.12);
       yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
     }
 
-    function clamp(n, min, max) {
-      return Math.max(min, Math.min(max, n));
-    }
+    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
 
     function moveNo(px, py) {
       const z = zone.getBoundingClientRect();
@@ -206,8 +203,7 @@
       let dx = (b.left + b.width / 2) - px;
       let dy = (b.top + b.height / 2) - py;
       let mag = Math.hypot(dx, dy) || 1;
-      dx /= mag;
-      dy /= mag;
+      dx /= mag; dy /= mag;
 
       let newLeft = (b.left - z.left) + dx * 150;
       let newTop  = (b.top - z.top) + dy * 150;
@@ -221,26 +217,31 @@
       growYes();
     }
 
+    // Runaway behavior
     zone.addEventListener("pointermove", e => {
       const b = noBtn.getBoundingClientRect();
       const d = Math.hypot((b.left + b.width / 2) - e.clientX, (b.top + b.height / 2) - e.clientY);
       if (d < 140) moveNo(e.clientX, e.clientY);
     });
 
+    /* ---------- THE NO-CLICK PROTECTOR ---------- */
+    function blockNo(e) {
+      e.preventDefault();
+      e.stopPropagation();
+      // Even if they manage to "click", make it jump away instead
+      moveNo(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY);
+    }
+
+    noBtn.addEventListener("click", blockNo);
+    noBtn.addEventListener("touchstart", blockNo, {passive: false});
+
     /* ---------- YES CLICK ---------- */
     yesBtn.addEventListener("click", () => {
       heading.style.display = "none";
       stretchContent.style.display = "none";
       result.style.display = "block";
-      
-      confetti({
-        particleCount: 150,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
+      confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
     });
-
-    noBtn.addEventListener("click", e => e.preventDefault());
   </script>
 </body>
 </html>
