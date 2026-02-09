@@ -3,240 +3,141 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <title>Will you be my Valentine?</title>
-
+  <title>A Message for Sonya</title>
   <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.3/dist/confetti.browser.min.js"></script>
-
   <style>
-    :root {
+    :root { 
       --yes: #9333ea; 
-      --noBg: #f3e8ff;
-      --card: rgba(255, 255, 255, 0.95);
-      --text: #2e1065;
+      --noBg: #f3e8ff; 
+      --text: #2e1065; 
+      --accent: #c084fc;
     }
-
-    * { box-sizing: border-box; }
-
     body {
-      margin: 0;
-      min-height: 100svh;
-      display: grid;
-      place-items: center;
+      margin: 0; min-height: 100svh; display: grid; place-items: center;
       background: radial-gradient(circle at center, #2e1065 0%, #0f0720 100%);
-      font-family: system-ui, -apple-system, sans-serif;
-      overflow: hidden;
-      padding: 16px;
+      font-family: system-ui, sans-serif; overflow: hidden;
     }
 
-    #confettiCanvas {
-      position: fixed;
-      inset: 0;
-      z-index: 9999;
-      pointer-events: none;
+    /* ENTRY SCREEN */
+    #startScreen {
+      position: fixed; inset: 0; z-index: 9999; display: flex; 
+      flex-direction: column; justify-content: center; align-items: center; 
+      background: #0f0720; color: white; transition: opacity 0.8s ease;
     }
+    .play-btn {
+      padding: 18px 45px; background: transparent; color: var(--accent);
+      border: 2px solid var(--accent); border-radius: 50px; font-size: 18px; 
+      font-weight: bold; cursor: pointer; transition: all 0.3s;
+      text-transform: uppercase; letter-spacing: 2px;
+    }
+    .play-btn:hover { background: var(--accent); color: white; box-shadow: 0 0 30px var(--accent); }
 
+    /* CARD STYLING */
     .card {
-      width: min(720px, 92vw);
-      padding: 30px 22px;
-      background: var(--card);
-      border-radius: 24px;
-      text-align: center;
-      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
-      /* This ensures the height grows naturally and smoothly */
-      transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-      overflow: hidden;
-      min-height: 100px; /* Starts small for the name */
+      width: min(720px, 92vw); padding: 30px 22px; background: rgba(255,255,255,0.98);
+      border-radius: 24px; text-align: center; display: none;
+      box-shadow: 0 20px 60px rgba(0,0,0,0.5); transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
     }
-
-    /* This keeps the question and GIF hidden initially */
-    .collapsible-content {
-      display: grid;
-      grid-template-rows: 0fr;
-      transition: grid-template-rows 0.6s ease, opacity 0.6s ease, margin 0.6s ease;
-      opacity: 0;
-    }
-
-    .collapsible-content.open {
-      grid-template-rows: 1fr;
-      opacity: 1;
-      margin-top: 20px;
-    }
-
+    .collapsible-content { display: grid; grid-template-rows: 0fr; opacity: 0; transition: all 0.7s ease; }
+    .collapsible-content.open { grid-template-rows: 1fr; opacity: 1; margin-top: 20px; }
     .inner { overflow: hidden; }
+    .art { width: min(260px, 80vw); margin: 0 auto 15px; display: block; border-radius: 15px; }
+    h1 { font-size: clamp(26px, 4vw, 42px); margin: 0; color: var(--text); opacity: 0; transition: opacity 0.5s; }
 
-    .art {
-      width: min(260px, 80vw);
-      margin: 0 auto 10px;
-      display: block;
-      border-radius: 12px;
-    }
-
-    h1 {
-      font-size: clamp(26px, 4vw, 44px);
-      margin: 0; /* Reset margin for intro */
-      color: var(--text);
-      transition: opacity 0.4s ease;
-    }
-
-    .button-zone {
-      position: relative;
-      width: 100%;
-      height: 160px;
-      margin: 0 auto;
-      touch-action: none;
-    }
-
+    /* BUTTONS */
+    .button-zone { position: relative; width: 100%; height: 160px; margin-top: 10px; touch-action: none; }
     button {
-      position: absolute;
-      top: 50%;
-      transform: translateY(-50%);
-      padding: 16px 28px;
-      font-size: 18px;
-      font-weight: 800;
-      border-radius: 999px;
-      border: none;
-      cursor: pointer;
-      user-select: none;
-      box-shadow: none !important;
-      transition: transform .12s ease, background .12s ease;
+      position: absolute; top: 50%; transform: translateY(-50%);
+      padding: 16px 30px; font-size: 18px; font-weight: 800;
+      border-radius: 999px; border: none; cursor: pointer; box-shadow: none !important;
     }
-
-    #yesBtn { left: 18%; background: var(--yes); color: #fff; z-index: 10; }
-    #noBtn { left: 62%; background: var(--noBg); color: var(--yes); z-index: 100; }
-
-    .hint {
-      margin-top: 10px;
-      font-size: 13px;
-      color: var(--yes);
-      opacity: 0;
-      transition: opacity 0.5s ease;
-    }
-
-    .result {
-      display: none;
-      animation: pop .35s ease;
-    }
-
-    .result h2 { font-size: clamp(34px, 5vw, 50px); color: var(--yes); }
-
-    @keyframes pop {
-      from { transform: scale(.96); opacity: 0; }
-      to { transform: scale(1); opacity: 1; }
-    }
+    #yesBtn { left: 15%; background: var(--yes); color: #fff; z-index: 10; transition: transform 0.2s; }
+    #noBtn { left: 60%; background: var(--noBg); color: var(--yes); z-index: 100; }
   </style>
 </head>
-
 <body>
-  <canvas id="confettiCanvas"></canvas>
-  
-  <audio id="bgMusic" loop>
-    <source src="https://files.catbox.moe/p9o6is.mp3" type="audio/mpeg">
+
+  <div id="startScreen">
+    <p style="margin-bottom: 25px; font-style: italic; opacity: 0.8;">Transmission received from the stars...</p>
+    <button class="play-btn" onclick="init()">Open Message</button>
+  </div>
+
+  <audio id="trueSong" loop>
+    <source src="https://ia801303.us.archive.org/21/items/SpandauBalletTrue/Spandau%20Ballet%20-%20True.mp3" type="audio/mpeg">
   </audio>
 
   <main class="card" id="mainCard">
     <h1 id="heading"></h1>
-
-    <div class="collapsible-content" id="stretchContent">
+    <div class="collapsible-content" id="stretch">
       <div class="inner">
-        <img class="art" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWZoM2t6ODd4czc0dXZ5aTY4b3lwdW5yczdrYmx0OThtODhkaDMzNCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Zl7u48zLVFgLpRwq6f/giphy.gif" alt="Cute Art">
-
+        <img class="art" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWZoM2t6ODd4czc0dXZ5aTY4b3lwdW5yczdrYmx0OThtODhkaDMzNCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Zl7u48zLVFgLpRwq6f/giphy.gif">
         <section class="button-zone" id="zone">
           <button id="yesBtn">Yes</button>
           <button id="noBtn">No</button>
         </section>
-
-        <div class="hint" id="hint">Is “No” an option? 😈</div>
       </div>
     </div>
-
-    <section class="result" id="result">
-      <h2>YAY! 🎉</h2>
-      <img class="art" src="https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3eHU0MndsYzZ1MGpqaXBoNHNmeGp6YWFvcjU2eGNseWF4NGdhY2t5OCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/lYjA4tfvCc8UAju1Op/giphy.gif" alt="Fireworks">
-    </section>
   </main>
 
   <script>
-    const zone = document.getElementById("zone");
-    const yesBtn = document.getElementById("yesBtn");
-    const noBtn = document.getElementById("noBtn");
-    const result = document.getElementById("result");
-    const hint = document.getElementById("hint");
-    const heading = document.getElementById("heading");
-    const stretchContent = document.getElementById("stretchContent");
-    const music = document.getElementById("bgMusic");
-
-    window.onload = () => {
-      // Intro sequence start
-      heading.innerText = "Hi Sonya,";
-      heading.style.opacity = 1;
+    const music = document.getElementById("trueSong");
+    
+    function init() {
+      // Fade out start screen and play music
+      document.getElementById("startScreen").style.opacity = "0";
+      setTimeout(() => { document.getElementById("startScreen").style.display = "none"; }, 800);
+      
+      document.getElementById("mainCard").style.display = "block";
+      
+      // The "Beginning" music play
+      music.volume = 0.5;
+      music.play();
+      
+      const h1 = document.getElementById("heading");
+      h1.innerText = "Hi Sonya,";
+      h1.style.opacity = 1;
       
       setTimeout(() => {
-        heading.style.opacity = 0;
+        h1.style.opacity = 0;
         setTimeout(() => {
-          heading.innerText = "Will you be my Valentine?";
-          heading.style.opacity = 1;
-          
-          // Now we expand the card
-          stretchContent.classList.add('open');
-          
-          music.play().catch(() => {
-            console.log("Music blocked - will start on move.");
-          });
-
-          setTimeout(() => { hint.style.opacity = 0.7; }, 3000);
+          h1.innerText = "Will you be my Valentine?";
+          h1.style.opacity = 1;
+          document.getElementById("stretch").classList.add('open');
         }, 600);
-      }, 1500);
-    };
-
-    // ... (rest of your runaway button logic stays exactly the same)
-    let yesScale = 1;
-    function growYes() {
-      yesScale = Math.min(2.5, yesScale + 0.12);
-      yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
+      }, 1800);
     }
 
-    function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
+    const noBtn = document.getElementById("noBtn");
+    const yesBtn = document.getElementById("yesBtn");
+    const zone = document.getElementById("zone");
+    let yesScale = 1;
 
     function moveNo(px, py) {
       const z = zone.getBoundingClientRect();
       const b = noBtn.getBoundingClientRect();
-      if (music.paused) music.play();
       let dx = (b.left + b.width / 2) - px;
       let dy = (b.top + b.height / 2) - py;
       let mag = Math.hypot(dx, dy) || 1;
-      dx /= mag; dy /= mag;
-      let newLeft = (b.left - z.left) + dx * 150;
-      let newTop  = (b.top - z.top) + dy * 150;
-      newLeft = clamp(newLeft, 0, z.width - b.width);
-      newTop  = clamp(newTop, 0, z.height - b.height);
-      noBtn.style.left = newLeft + "px";
-      noBtn.style.top = newTop + "px";
-      noBtn.style.transform = "none";
-      growYes();
+      
+      let newLeft = (b.left - z.left) + (dx / mag) * 160;
+      let newTop = (b.top - z.top) + (dy / mag) * 160;
+      
+      noBtn.style.left = Math.max(0, Math.min(z.width - b.width, newLeft)) + "px";
+      noBtn.style.top = Math.max(0, Math.min(z.height - b.height, newTop)) + "px";
+      
+      yesScale = Math.min(2.8, yesScale + 0.15);
+      yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
     }
 
     zone.addEventListener("pointermove", e => {
       const b = noBtn.getBoundingClientRect();
-      const d = Math.hypot((b.left + b.width / 2) - e.clientX, (b.top + b.height / 2) - e.clientY);
-      if (d < 140) moveNo(e.clientX, e.clientY);
+      if (Math.hypot((b.left + b.width / 2) - e.clientX, (b.top + b.height / 2) - e.clientY) < 130) moveNo(e.clientX, e.clientY);
     });
 
-    function blockNo(e) {
-      e.preventDefault();
-      const x = e.clientX || (e.touches && e.touches[0].clientX);
-      const y = e.clientY || (e.touches && e.touches[0].clientY);
-      moveNo(x, y);
-    }
-
-    noBtn.addEventListener("click", blockNo);
-    noBtn.addEventListener("touchstart", blockNo, {passive: false});
-
-    yesBtn.addEventListener("click", () => {
-      heading.style.display = "none";
-      stretchContent.style.display = "none";
-      result.style.display = "block";
-      confetti({ particleCount: 150, spread: 70, origin: { y: 0.6 } });
-    });
+    yesBtn.onclick = () => {
+       document.getElementById("mainCard").innerHTML = "<h2 style='color:var(--yes); font-size: 40px;'>I know this much is true... 💜</h2><img src='https://media.giphy.com/media/lYjA4tfvCc8UAju1Op/giphy.gif' style='width:100%'>";
+       confetti({ particleCount: 250, spread: 80, colors: ['#9333ea', '#ffffff', '#c084fc'] });
+    };
   </script>
 </body>
 </html>
