@@ -9,12 +9,10 @@
 
   <style>
     :root {
-      --bg1: #f3e8ff; /* Light purple tint */
-      --bg2: #ffffff;
-      --card: #ffffffcc;
-      --yes: #9333ea; /* Vibrant Purple */
-      --yesHover: #7e22ce;
-      --noBg: #f3e8ff; /* Soft Purple for No */
+      --yes: #9333ea; 
+      --noBg: #f3e8ff;
+      --card: rgba(255, 255, 255, 0.95);
+      --text: #2e1065;
     }
 
     * { box-sizing: border-box; }
@@ -24,8 +22,8 @@
       min-height: 100svh;
       display: grid;
       place-items: center;
-      background: radial-gradient(circle at top, var(--bg2), var(--bg1));
-      font-family: system-ui, sans-serif;
+      background: radial-gradient(circle at center, #2e1065 0%, #0f0720 100%);
+      font-family: system-ui, -apple-system, sans-serif;
       overflow: hidden;
       padding: 16px;
     }
@@ -33,35 +31,35 @@
     #confettiCanvas {
       position: fixed;
       inset: 0;
-      width: 100vw;
-      height: 100vh;
-      pointer-events: none;
       z-index: 9999;
+      pointer-events: none;
     }
 
     .card {
       width: min(720px, 92vw);
-      padding: 26px 22px;
+      padding: 30px 22px;
       background: var(--card);
-      backdrop-filter: blur(10px);
-      border-radius: 22px;
+      border-radius: 24px;
       text-align: center;
-      box-shadow: 0 10px 40px rgba(147, 51, 234, 0.1); /* Very subtle purple tint */
+      box-shadow: 0 20px 50px rgba(0,0,0,0.3);
+      /* This ensures the height grows naturally and smoothly */
       transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
       overflow: hidden;
+      min-height: 100px; /* Starts small for the name */
     }
 
+    /* This keeps the question and GIF hidden initially */
     .collapsible-content {
       display: grid;
       grid-template-rows: 0fr;
-      transition: grid-template-rows 0.6s ease, opacity 0.6s ease;
+      transition: grid-template-rows 0.6s ease, opacity 0.6s ease, margin 0.6s ease;
       opacity: 0;
     }
 
     .collapsible-content.open {
       grid-template-rows: 1fr;
       opacity: 1;
-      margin-top: 10px;
+      margin-top: 20px;
     }
 
     .inner { overflow: hidden; }
@@ -70,13 +68,13 @@
       width: min(260px, 80vw);
       margin: 0 auto 10px;
       display: block;
-      filter: drop-shadow(0 10px 14px rgba(0,0,0,.08));
+      border-radius: 12px;
     }
 
     h1 {
       font-size: clamp(26px, 4vw, 44px);
-      margin: 12px 0 18px;
-      color: #4b1a8a; /* Darker purple for text */
+      margin: 0; /* Reset margin for intro */
+      color: var(--text);
       transition: opacity 0.4s ease;
     }
 
@@ -99,46 +97,27 @@
       border: none;
       cursor: pointer;
       user-select: none;
-      -webkit-tap-highlight-color: transparent;
-      box-shadow: none !important; /* STRICTLY NO SHADOW */
+      box-shadow: none !important;
       transition: transform .12s ease, background .12s ease;
     }
 
-    #yesBtn {
-      left: 18%;
-      background: var(--yes);
-      color: #fff;
-      z-index: 10;
-    }
-
-    #noBtn {
-      left: 62%;
-      background: var(--noBg);
-      color: #6b21a8;
-      z-index: 100; /* No button still on top */
-    }
+    #yesBtn { left: 18%; background: var(--yes); color: #fff; z-index: 10; }
+    #noBtn { left: 62%; background: var(--noBg); color: var(--yes); z-index: 100; }
 
     .hint {
       margin-top: 10px;
       font-size: 13px;
-      color: #6b21a8;
+      color: var(--yes);
       opacity: 0;
       transition: opacity 0.5s ease;
     }
 
     .result {
       display: none;
-      margin-top: -40px;
       animation: pop .35s ease;
     }
 
-    .result h2 { 
-      font-size: clamp(34px, 5vw, 50px); 
-      margin: 10px 0; 
-      color: var(--yes);
-    }
-
-    .fireworks { width: min(380px, 90vw); margin: 0 auto; display: block; }
+    .result h2 { font-size: clamp(34px, 5vw, 50px); color: var(--yes); }
 
     @keyframes pop {
       from { transform: scale(.96); opacity: 0; }
@@ -149,13 +128,17 @@
 
 <body>
   <canvas id="confettiCanvas"></canvas>
+  
+  <audio id="bgMusic" loop>
+    <source src="https://files.catbox.moe/p9o6is.mp3" type="audio/mpeg">
+  </audio>
 
   <main class="card" id="mainCard">
     <h1 id="heading"></h1>
 
     <div class="collapsible-content" id="stretchContent">
       <div class="inner">
-        <img id="mainArt" class="art" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWZoM2t6ODd4czc0dXZ5aTY4b3lwdW5yczdrYmx0OThtODhkaDMzNCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Zl7u48zLVFgLpRwq6f/giphy.gif" alt="Cute Art">
+        <img class="art" src="https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExdWZoM2t6ODd4czc0dXZ5aTY4b3lwdW5yczdrYmx0OThtODhkaDMzNCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/Zl7u48zLVFgLpRwq6f/giphy.gif" alt="Cute Art">
 
         <section class="button-zone" id="zone">
           <button id="yesBtn">Yes</button>
@@ -168,7 +151,7 @@
 
     <section class="result" id="result">
       <h2>YAY! 🎉</h2>
-      <img class="fireworks" src="https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3eHU0MndsYzZ1MGpqaXBoNHNmeGp6YWFvcjU2eGNseWF4NGdhY2t5OCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/lYjA4tfvCc8UAju1Op/giphy.gif" alt="Fireworks">
+      <img class="art" src="https://media.giphy.com/media/v1.Y2lkPWVjZjA1ZTQ3eHU0MndsYzZ1MGpqaXBoNHNmeGp6YWFvcjU2eGNseWF4NGdhY2t5OCZlcD12MV9naWZzX3NlYXJjaCZjdD1n/lYjA4tfvCc8UAju1Op/giphy.gif" alt="Fireworks">
     </section>
   </main>
 
@@ -180,25 +163,36 @@
     const hint = document.getElementById("hint");
     const heading = document.getElementById("heading");
     const stretchContent = document.getElementById("stretchContent");
+    const music = document.getElementById("bgMusic");
 
     window.onload = () => {
+      // Intro sequence start
       heading.innerText = "Hi Sonya,";
+      heading.style.opacity = 1;
+      
       setTimeout(() => {
         heading.style.opacity = 0;
         setTimeout(() => {
           heading.innerText = "Will you be my Valentine?";
           heading.style.opacity = 1;
+          
+          // Now we expand the card
           stretchContent.classList.add('open');
+          
+          music.play().catch(() => {
+            console.log("Music blocked - will start on move.");
+          });
+
           setTimeout(() => { hint.style.opacity = 0.7; }, 3000);
-        }, 500);
+        }, 600);
       }, 1500);
     };
 
+    // ... (rest of your runaway button logic stays exactly the same)
     let yesScale = 1;
     function growYes() {
       yesScale = Math.min(2.5, yesScale + 0.12);
       yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
-      // Shadow remains removed even during growth
     }
 
     function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
@@ -206,18 +200,15 @@
     function moveNo(px, py) {
       const z = zone.getBoundingClientRect();
       const b = noBtn.getBoundingClientRect();
-
+      if (music.paused) music.play();
       let dx = (b.left + b.width / 2) - px;
       let dy = (b.top + b.height / 2) - py;
       let mag = Math.hypot(dx, dy) || 1;
       dx /= mag; dy /= mag;
-
       let newLeft = (b.left - z.left) + dx * 150;
       let newTop  = (b.top - z.top) + dy * 150;
-
       newLeft = clamp(newLeft, 0, z.width - b.width);
       newTop  = clamp(newTop, 0, z.height - b.height);
-
       noBtn.style.left = newLeft + "px";
       noBtn.style.top = newTop + "px";
       noBtn.style.transform = "none";
@@ -232,7 +223,6 @@
 
     function blockNo(e) {
       e.preventDefault();
-      e.stopPropagation();
       const x = e.clientX || (e.touches && e.touches[0].clientX);
       const y = e.clientY || (e.touches && e.touches[0].clientY);
       moveNo(x, y);
