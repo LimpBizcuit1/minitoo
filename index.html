@@ -9,11 +9,12 @@
 
   <style>
     :root {
-      --bg1: #ffd6e7;
-      --bg2: #ffeef6;
+      --bg1: #f3e8ff; /* Light purple tint */
+      --bg2: #ffffff;
       --card: #ffffffcc;
-      --yes: #ff3b7a;
-      --yesHover: #ff1f68;
+      --yes: #9333ea; /* Vibrant Purple */
+      --yesHover: #7e22ce;
+      --noBg: #f3e8ff; /* Soft Purple for No */
     }
 
     * { box-sizing: border-box; }
@@ -45,7 +46,7 @@
       backdrop-filter: blur(10px);
       border-radius: 22px;
       text-align: center;
-      box-shadow: 0 18px 60px rgba(0,0,0,.15);
+      box-shadow: 0 10px 40px rgba(147, 51, 234, 0.1); /* Very subtle purple tint */
       transition: all 0.6s cubic-bezier(0.4, 0, 0.2, 1);
       overflow: hidden;
     }
@@ -69,12 +70,13 @@
       width: min(260px, 80vw);
       margin: 0 auto 10px;
       display: block;
-      filter: drop-shadow(0 10px 14px rgba(0,0,0,.12));
+      filter: drop-shadow(0 10px 14px rgba(0,0,0,.08));
     }
 
     h1 {
       font-size: clamp(26px, 4vw, 44px);
       margin: 12px 0 18px;
+      color: #4b1a8a; /* Darker purple for text */
       transition: opacity 0.4s ease;
     }
 
@@ -90,7 +92,7 @@
       position: absolute;
       top: 50%;
       transform: translateY(-50%);
-      padding: 16px 24px;
+      padding: 16px 28px;
       font-size: 18px;
       font-weight: 800;
       border-radius: 999px;
@@ -98,6 +100,7 @@
       cursor: pointer;
       user-select: none;
       -webkit-tap-highlight-color: transparent;
+      box-shadow: none !important; /* STRICTLY NO SHADOW */
       transition: transform .12s ease, background .12s ease;
     }
 
@@ -106,20 +109,19 @@
       background: var(--yes);
       color: #fff;
       z-index: 10;
-      box-shadow: 0 4px 12px rgba(255, 59, 122, 0.25);
     }
 
     #noBtn {
       left: 62%;
-      background: #e5e7eb;
-      color: #111827;
-      z-index: 100; 
-      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+      background: var(--noBg);
+      color: #6b21a8;
+      z-index: 100; /* No button still on top */
     }
 
     .hint {
       margin-top: 10px;
       font-size: 13px;
+      color: #6b21a8;
       opacity: 0;
       transition: opacity 0.5s ease;
     }
@@ -130,7 +132,11 @@
       animation: pop .35s ease;
     }
 
-    .result h2 { font-size: clamp(34px, 5vw, 50px); margin: 10px 0; }
+    .result h2 { 
+      font-size: clamp(34px, 5vw, 50px); 
+      margin: 10px 0; 
+      color: var(--yes);
+    }
 
     .fireworks { width: min(380px, 90vw); margin: 0 auto; display: block; }
 
@@ -192,6 +198,7 @@
     function growYes() {
       yesScale = Math.min(2.5, yesScale + 0.12);
       yesBtn.style.transform = `translateY(-50%) scale(${yesScale})`;
+      // Shadow remains removed even during growth
     }
 
     function clamp(n, min, max) { return Math.max(min, Math.min(max, n)); }
@@ -217,25 +224,23 @@
       growYes();
     }
 
-    // Runaway behavior
     zone.addEventListener("pointermove", e => {
       const b = noBtn.getBoundingClientRect();
       const d = Math.hypot((b.left + b.width / 2) - e.clientX, (b.top + b.height / 2) - e.clientY);
       if (d < 140) moveNo(e.clientX, e.clientY);
     });
 
-    /* ---------- THE NO-CLICK PROTECTOR ---------- */
     function blockNo(e) {
       e.preventDefault();
       e.stopPropagation();
-      // Even if they manage to "click", make it jump away instead
-      moveNo(e.clientX || e.touches[0].clientX, e.clientY || e.touches[0].clientY);
+      const x = e.clientX || (e.touches && e.touches[0].clientX);
+      const y = e.clientY || (e.touches && e.touches[0].clientY);
+      moveNo(x, y);
     }
 
     noBtn.addEventListener("click", blockNo);
     noBtn.addEventListener("touchstart", blockNo, {passive: false});
 
-    /* ---------- YES CLICK ---------- */
     yesBtn.addEventListener("click", () => {
       heading.style.display = "none";
       stretchContent.style.display = "none";
